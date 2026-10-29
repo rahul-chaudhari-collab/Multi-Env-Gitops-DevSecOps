@@ -201,4 +201,4 @@ GitHub: [rahul-chaudhari-collab](https://github.com/rahul-chaudhari-collab)
 
 ---
 
-*This repository is an educational / portfolio implementation. AWS resources can incur charges. No live EKS, Argo CD or monitoring deployment is claimed in this document.*
+
