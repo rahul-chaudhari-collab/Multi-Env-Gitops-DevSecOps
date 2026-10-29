@@ -90,3 +90,22 @@ Future enhancements:
 
 Rahul Chaudhari
 GitHub: https://github.com/rahul-chaudhari-collab
+
+## Architecture Diagram
+
+~~mermaid
+flowchart TD
+    A[Developer] --> B[GitHub Repository]
+    B --> C[GitHub Actions]
+    C --> D[Python Tests]
+    D --> E[Docker Build]
+    E --> F[Trivy Security Scan]
+    F --> G[AWS ECR]
+    G -.-> H[Amazon EKS - Planned]
+    I[Terraform] -.-> H
+    J[Argo CD - Planned] -.-> H
+    H -.-> K[Development]
+    H -.-> L[Staging]
+    H -.-> M[Production]
+~~
+
