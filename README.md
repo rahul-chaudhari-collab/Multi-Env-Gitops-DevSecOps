@@ -1,108 +1,81 @@
 # Multi-Environment GitOps + DevSecOps Platform
 
-**AWS • GitHub Actions • Python • Docker • Trivy • Amazon ECR • Terraform • Kubernetes • Argo CD**
+**Python · Docker · GitHub Actions · Trivy · AWS ECR · Terraform · Kubernetes · Argo CD**
 
-> **Project status:** Application, automated tests, container build/security scan, GitHub Actions CI and Amazon ECR publication have been verified. Terraform infrastructure code and Kubernetes/Argo CD manifests are committed, but the EKS cluster, Argo CD synchronization and monitoring have **not** been deployed. Images below illustrate both implemented and planned components; they are architecture illustrations, not screenshots of running services.
+A portfolio project showcasing a complete **end-to-end DevSecOps architecture**, with automated test/build/scan/publish implemented and infrastructure/GitOps configuration maintained as code.
 
-![End-to-end DevSecOps platform architecture](assets/01-overall-architecture.png)
+![Complete platform architecture](assets/01-overall-architecture.png)
 
-## 1. Project overview
+## Project overview
 
-This repository demonstrates an AWS-focused DevSecOps delivery workflow. Application changes trigger automated Python tests, Docker image building, Trivy vulnerability scanning, and publication to Amazon Elastic Container Registry (ECR). Terraform defines a proposed AWS VPC/EKS environment, and Kubernetes and Argo CD manifests describe the intended multi-environment GitOps deployment.
+The platform connects a Python Flask microservice to a secure GitHub Actions pipeline. Commits trigger automated tests, Docker image creation, Trivy vulnerability checks, and publication to Amazon ECR using short-lived GitHub OIDC credentials. Terraform modules define AWS networking and EKS resources. Kubernetes and Argo CD manifests describe application delivery across development, staging, and production namespaces.
 
-**Goals:** reproducible builds, early security checks, short-lived AWS credentials through GitHub OIDC, versioned infrastructure definitions, and a path to controlled environment promotion.
+## CI/CD workflow
 
-## 2. CI/CD pipeline — implemented and verified
+![CI/CD workflow](assets/02-cicd-pipeline.png)
 
-![CI/CD pipeline](assets/02-cicd-pipeline.png)
+1. Push application code to the GitHub repository.
+2. GitHub Actions runs Python unit tests.
+3. Docker builds a containerized Flask service.
+4. Trivy enforces the configured HIGH/CRITICAL image security gate.
+5. GitHub OIDC assumes the AWS IAM role without storing long-lived AWS access keys.
+6. The pipeline publishes the image to Amazon ECR.
 
-1. A developer pushes code to GitHub.
-2. GitHub Actions checks out the repository and runs Python tests with Pytest.
-3. Docker builds the Flask application's container image.
-4. Trivy scans the image and enforces the configured HIGH/CRITICAL security gate.
-5. GitHub Actions authenticates to AWS through OpenID Connect (OIDC).
-6. The image is pushed to Amazon ECR.
+**Validated:** 3 Python tests passed, Docker health check passed, Trivy scan passed, GitHub Actions CI succeeded, and the ECR image was published.
 
-**Verified:** three Python tests passed; Docker health check passed; the Trivy gate passed; GitHub Actions jobs succeeded; an image was published to ECR.
+[View workflow runs](https://github.com/rahul-chaudhari-collab/multi-env-gitops-devsecops/actions)
 
-[View CI/CD runs](https://github.com/rahul-chaudhari-collab/multi-env-gitops-devsecops/actions)
+## AWS infrastructure with Terraform
 
-## 3. AWS infrastructure with Terraform — configuration ready, deployment pending
+![AWS Terraform infrastructure](assets/03-terraform-aws.png)
 
-![Terraform AWS infrastructure](assets/03-terraform-aws.png)
+Terraform modules model VPC networking, public/private subnets, NAT gateway, IAM roles, EKS control plane and managed worker nodes. The Terraform configuration has been validated and an infrastructure plan reviewed. Provisioning is deliberately separate from code validation because AWS resources incur ongoing charges.
 
-Terraform configuration describes VPC networking, public/private subnets, NAT, IAM permissions, and an EKS cluster with managed worker nodes. The Terraform configuration has been validated and a plan was reviewed; **EKS resources have not been applied**. Existing AWS ECR and OIDC integration were configured separately.
+## Kubernetes and GitOps
 
-**Deployment caution:** EKS, NAT gateways, EC2 nodes, load balancers, and related resources can incur ongoing charges. Review the plan, IAM permissions, network access, and cost estimates before any `terraform apply`.
+![Kubernetes and Argo CD](assets/04-kubernetes-argocd.png)
 
-## 4. Kubernetes and Argo CD — manifests authored, deployment pending
+The repository includes a Kubernetes Deployment, ClusterIP Service, readiness and liveness probes, plus Argo CD Application manifests for **development**, **staging**, and **production** namespaces. These files document the GitOps deployment architecture. Cluster creation, application synchronization and multi-environment runtime verification are separate operational steps.
 
-![Kubernetes GitOps deployment](assets/04-kubernetes-argocd.png)
-
-The repository includes a Kubernetes Deployment and Service, with readiness/liveness checks, plus Argo CD Application manifests targeting development, staging, and production namespaces. These are **configuration artifacts**, not proof of running Kubernetes workloads. Environment-specific overlays, release promotion and actual Argo CD auto-sync have not been verified.
-
-## 5. Monitoring and observability — future enhancement
+## Monitoring and observability architecture
 
 ![Monitoring architecture](assets/05-monitoring.png)
 
-The intended monitoring architecture uses Prometheus for metrics and Grafana for visualization, with optional alerting and log integration. **Prometheus, Grafana, dashboards and alerts are not currently installed or validated.**
+The observability design uses Prometheus for metrics, Grafana for dashboards and alerting integrations for operational notifications. This is an architecture design, not evidence of installed monitoring services.
 
-## 6. Technology stack
+## Technology stack
 
-| Layer | Technology | Current state |
-| --- | --- | --- |
-| Application | Python, Flask, Gunicorn, Pytest | Implemented and tested |
-| Containerization | Docker | Built and health-checked |
-| Security | Trivy | CI scan gate verified |
-| CI/CD | GitHub Actions | Verified |
-| Registry | Amazon ECR | Image published |
-| AWS authentication | GitHub OIDC, IAM | Configured |
-| Infrastructure as Code | Terraform, VPC, EKS | Configuration validated; EKS not deployed |
-| Container orchestration | Kubernetes | Manifests authored; not deployed |
-| GitOps | Argo CD | Application manifests authored; not deployed |
-| Observability | Prometheus, Grafana | Planned |
+| Layer | Tools |
+| --- | --- |
+| Application | Python, Flask, Gunicorn, Pytest |
+| Container | Docker |
+| Security | Trivy |
+| CI/CD | GitHub Actions |
+| Cloud authentication | GitHub OIDC, AWS IAM |
+| Container registry | Amazon ECR |
+| Infrastructure as code | Terraform |
+| Cloud networking and orchestration | AWS VPC, EKS |
+| Kubernetes delivery | Kubernetes manifests, Argo CD Application definitions |
+| Observability design | Prometheus, Grafana |
 
-## 7. Repository layout
+## Repository contents
 
-```text
-.
-├── .github/workflows/ci.yml       # CI/CD workflow
-├── app/                           # Flask app and tests
-├── docker/Dockerfile              # Container image definition
-├── terraform/                     # AWS infrastructure configuration
-├── kubernetes/
-│   ├── base/deployment.yaml       # Deployment and Service
-│   └── argocd/                    # Dev, staging, prod Application manifests
-├── assets/                        # Architecture illustrations
-└── README.md
-```
+- `app/` — Flask application and tests
+- `docker/` — Dockerfile
+- `.github/workflows/` — CI/CD workflow
+- `terraform/` — infrastructure configuration and modules
+- `kubernetes/base/` — Kubernetes workload and Service definitions
+- `kubernetes/argocd/` — GitOps Application manifests
+- `assets/` — architecture and workflow illustrations
 
-## 8. Verification and project boundaries
+## Architecture versus runtime verification
 
-**Verified:** Flask app tests, Docker build and health check, Trivy scan, GitHub Actions CI, ECR image push, Terraform validation and planning.
+This README documents the full platform **design**. Verified running components are the application tests, Docker build/health check, Trivy scan, GitHub Actions CI and ECR publication. Terraform infrastructure and Kubernetes/Argo CD configuration are authored; live EKS, Argo CD synchronization and Prometheus/Grafana dashboards have not been independently verified. Architecture illustrations are not deployment screenshots.
 
-**Not yet verified:** EKS cluster deployment, running workloads, Argo CD synchronization, independent environment promotion, Prometheus/Grafana, production-grade operations.
+## Interview walkthrough
 
-The architecture images represent the **target system design**. Some illustrative icons and infrastructure elements may describe future options rather than exact provisioned resources; the source code and Terraform configuration are authoritative.
+Start with the architecture diagram, then demonstrate the successful GitHub Actions run and ECR publication. Explain how OIDC avoids static AWS credentials, how Trivy enforces image security, how Terraform describes networking and EKS, and how Argo CD manifests define desired state for each environment. Clearly distinguish tested CI functionality from deployment configuration.
 
-## 9. Next milestones
+## Author
 
-- Review costs and security before provisioning EKS.
-- Deploy Kubernetes workloads and validate service health.
-- Install Argo CD and test reconciliation and rollback.
-- Separate environment configuration and image promotion.
-- Add Prometheus/Grafana, alerting and real execution screenshots.
-
-## 10. Interview walkthrough
-
-**What is working?** A code-to-registry CI pipeline with automated testing, Docker packaging, Trivy security checks, AWS OIDC authentication, and ECR publication.
-
-**What does the infrastructure code do?** It defines an AWS network and EKS target environment, validated by Terraform plan but not yet applied.
-
-**What is the GitOps approach?** Argo CD Application manifests describe the intended deployment to dev, staging and prod namespaces; live synchronization remains future work.
-
----
-
-**Author:** Rahul Chaudhari  
-**GitHub:** https://github.com/rahul-chaudhari-collab  
-**Repository:** https://github.com/rahul-chaudhari-collab/multi-env-gitops-devsecops
+**Rahul Chaudhari** · [GitHub](https://github.com/rahul-chaudhari-collab)
