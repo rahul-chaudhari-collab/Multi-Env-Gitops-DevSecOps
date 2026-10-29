@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitops-devsecops-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gitops-devsecops-app
+  template:
+    metadata:
+      labels:
+        app: gitops-devsecops-app
+    spec:
+      containers:
+        - name: app
+          image: 444166849721.dkr.ecr.ap-south-1.amazonaws.com/gitops-devsecops-app:dec2213219db523bef5975d47de78525c5fad16b
+          ports:
+            - containerPort: 5000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitops-devsecops-service
+spec:
+  type: ClusterIP
+  selector:
+    app: gitops-devsecops-app
+  ports:
+    - port: 80
+      targetPort: 5000
