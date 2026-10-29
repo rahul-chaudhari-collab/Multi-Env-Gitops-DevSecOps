@@ -93,7 +93,7 @@ GitHub: https://github.com/rahul-chaudhari-collab
 
 ## Architecture Diagram
 
-~~mermaid
+```mermaid
 flowchart TD
     A[Developer] --> B[GitHub Repository]
     B --> C[GitHub Actions]
@@ -107,5 +107,5 @@ flowchart TD
     H -.-> K[Development]
     H -.-> L[Staging]
     H -.-> M[Production]
-~~
+```
 
