@@ -44,3 +44,14 @@ build/
 # Generated security scan reports
 sbom.json
 trivy-*.json
+
+# Terraform saved plans
+tfplan
+*.tfplan
+*.tfplan.*
+oidc.tfplan
+
+# Local backup files
+*.backup
+*.debian-backup
+*.pre-multistage
