@@ -34,7 +34,7 @@ data "aws_iam_policy_document" "github_trust" {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
       values = [
-        "repo:rahul-chaudhari-collab/multi-env-gitops-devsecops:ref:refs/heads/main"
+        "repo:rahul-chaudhari-collab@274419200/multi-env-gitops-devsecops@1438828544:ref:refs/heads/main"
       ]
     }
   }
