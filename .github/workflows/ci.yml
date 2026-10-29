@@ -65,6 +65,7 @@ jobs:
             --severity HIGH,CRITICAL \
             --format json \
             --output trivy-report.json \
+            --exit-code 1 \
             gitops-devsecops-app:${{ github.sha }}
 
       - name: Display vulnerability summary
