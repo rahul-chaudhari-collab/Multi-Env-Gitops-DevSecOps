@@ -29,7 +29,7 @@ This project demonstrates a security-aware software delivery workflow: source ch
 
 ## 2. Architecture
 
-![End-to-end DevSecOps architecture](assets/architecture.png)
+
 
 **Verified path:** `Developer → GitHub → GitHub Actions → Pytest → Docker build → Trivy → AWS ECR`
 
